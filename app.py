@@ -19,11 +19,7 @@ with open("./nb_model.pkl", "rb") as nb_file:
 with open("./vectorizer.pkl", "rb") as vectorizer_file:
     vectorizer = pickle.load(vectorizer_file)
 
-# Load training data from CSV file
-training_data_df = pd.read_csv("./sensitive_messages.csv")
-training_data = training_data_df["text"].tolist()
 
-vectorizer.fit(training_data)
 
 @app.route("/")
 def home():
@@ -43,19 +39,20 @@ def predict():
         # Chuyển đổi văn bản sang đặc trưng TF-IDF
         text_vectorized = vectorizer.transform([text])
 
-        # Dự đoán nhãn
+        # Dự đoán nhãn từ các mô hình
         knn_prediction = knn_model.predict(text_vectorized)[0]
         lr_prediction = lr_model.predict(text_vectorized)[0]
         nb_prediction = nb_model.predict(text_vectorized)[0]
         
+        # Kết hợp các dự đoán từ các mô hình (Lấy giá trị mode)
         combined_predictions = np.array([knn_prediction, lr_prediction, nb_prediction])
         final_predictions, _ = mode(combined_predictions, axis=0)
 
-        # Trả kết quả
+        # Trả kết quả dự đoán
         return jsonify({"text": text, "prediction": final_predictions.tolist()})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run()
