@@ -1,15 +1,22 @@
 from flask import Flask, request, jsonify
-import joblib
 import numpy as np
 from scipy.stats import mode
+import pickle
 
 app = Flask(__name__)
 
 # Tải mô hình và vectorizer đã lưu
-knn_model = joblib.load("./knn_model.pkl")
-lr_model = joblib.load("./lr_model.pkl")
-nb_model = joblib.load("./nb_model.pkl")
-vectorizer = joblib.load("./vectorizer.pkl")
+with open("./knn_model.pkl", "rb") as knn_file:
+    knn_model = pickle.load(knn_file)
+
+with open("./lr_model.pkl", "rb") as lr_file:
+    lr_model = pickle.load(lr_file)
+
+with open("./nb_model.pkl", "rb") as nb_file:
+    nb_model = pickle.load(nb_file)
+
+with open("./vectorizer.pkl", "rb") as vectorizer_file:
+    vectorizer = pickle.load(vectorizer_file)
 
 @app.route("/")
 def home():
