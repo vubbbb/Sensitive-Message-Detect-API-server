@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import numpy as np
 from scipy.stats import mode
 import pickle
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -17,6 +18,12 @@ with open("./nb_model.pkl", "rb") as nb_file:
 
 with open("./vectorizer.pkl", "rb") as vectorizer_file:
     vectorizer = pickle.load(vectorizer_file)
+
+# Load training data from CSV file
+training_data_df = pd.read_csv("./sensitive_messages.csv")
+training_data = training_data_df["text"].tolist()
+
+vectorizer.fit(training_data)
 
 @app.route("/")
 def home():
