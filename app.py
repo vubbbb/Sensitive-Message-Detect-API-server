@@ -3,6 +3,9 @@ import numpy as np
 from scipy.stats import mode
 import pickle
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+import re
 
 app = Flask(__name__)
 
@@ -16,10 +19,25 @@ with open("./lr_model.pkl", "rb") as lr_file:
 with open("./nb_model.pkl", "rb") as nb_file:
     nb_model = pickle.load(nb_file)
 
-with open("./vectorizer.pkl", "rb") as vectorizer_file:
-    vectorizer = pickle.load(vectorizer_file)
+# Load dữ liệu
+data = pd.read_csv('./sensitive_messages.csv')
+X = data['text'].tolist()
+y = data['label'].tolist()
 
+# Làm sạch dữ liệu
+def clean_text(text):
+    text = text.lower()
+    text = re.sub(r"[^\w\s]", "", text)  # Loại bỏ ký tự đặc biệt
+    return text
 
+X_cleaned = [clean_text(x) for x in X]
+
+# Tách tập train và test
+X_train, X_test, y_train, y_test = train_test_split(X_cleaned, y, test_size=0.2, random_state=42)
+
+# Trích đặc trưng bằng TF-IDF
+vectorizer = TfidfVectorizer(max_features=5000)
+vectorizer.fit(X_train)
 
 @app.route("/")
 def home():
@@ -37,8 +55,7 @@ def predict():
         text = data["text"]
 
         # Chuyển đổi văn bản sang đặc trưng TF-IDF
-        if not hasattr(vectorizer, 'idf_'):
-            vectorizer.fit([text])
+
         text_vectorized = vectorizer.transform([text])
 
         # Dự đoán nhãn từ các mô hình
