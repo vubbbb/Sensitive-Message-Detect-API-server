@@ -37,6 +37,8 @@ def predict():
         text = data["text"]
 
         # Chuyển đổi văn bản sang đặc trưng TF-IDF
+        if not hasattr(vectorizer, 'idf_'):
+            vectorizer.fit([text])
         text_vectorized = vectorizer.transform([text])
 
         # Dự đoán nhãn từ các mô hình
@@ -55,4 +57,4 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
